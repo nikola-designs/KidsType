@@ -47,7 +47,7 @@ export const TextLayer = ({
   );
 
   useEffect(() => {
-    if (!activeBlockId) {
+    if (!activeBlockId || !textMode) {
       return;
     }
 
@@ -58,7 +58,7 @@ export const TextLayer = ({
 
     activeElement.focus();
     placeCaretAtEnd(activeElement);
-  }, [activeBlockId, blocks.length]);
+  }, [activeBlockId, blocks.length, textMode]);
 
   return (
     <div className={`absolute inset-0 z-10 ${textMode ? "pointer-events-auto" : "pointer-events-none"}`}>
@@ -68,22 +68,14 @@ export const TextLayer = ({
           return null;
         }
 
-        const isActive = textMode && activeBlockId === block.id;
-        const sharedStyle = {
-          left: block.x,
-          top: block.y,
-          width: `${layout.width}px`,
-          minHeight: `${layout.height}px`,
-          lineHeight: `${textLayoutConfig.lineHeightPx}px`,
-          fontSize: `${textLayoutConfig.fontSizePx}px`,
-          fontWeight: textLayoutConfig.fontWeight
-        };
-
         return (
           <div
-            className="absolute rounded-md px-1 text-ink"
+            className="absolute whitespace-pre-wrap break-words rounded-md px-1 text-ink caret-sage outline-none"
+            contentEditable={textMode}
             data-text-block="true"
             key={block.id}
+            onBlur={() => onBlurBlock(block.id)}
+            onInput={(event) => onUpdateBlock(block.id, event.currentTarget.textContent ?? "")}
             onPointerDown={(event) => {
               if (!textMode) {
                 return;
@@ -91,35 +83,26 @@ export const TextLayer = ({
               event.stopPropagation();
               onFocusBlock(block.id);
             }}
-            style={sharedStyle}
+            ref={(node) => {
+              if (node) {
+                blockRefs.current.set(block.id, node);
+                return;
+              }
+              blockRefs.current.delete(block.id);
+            }}
+            spellCheck={false}
+            style={{
+              left: block.x,
+              top: block.y,
+              width: `${layout.width}px`,
+              minHeight: `${layout.height}px`,
+              lineHeight: `${textLayoutConfig.lineHeightPx}px`,
+              fontSize: `${textLayoutConfig.fontSizePx}px`,
+              fontWeight: textLayoutConfig.fontWeight
+            }}
+            suppressContentEditableWarning
           >
-            {isActive ? (
-              <div
-                className="whitespace-pre-wrap break-words caret-sage outline-none"
-                contentEditable
-                data-text-block="true"
-                onBlur={() => onBlurBlock(block.id)}
-                onInput={(event) => onUpdateBlock(block.id, event.currentTarget.textContent ?? "")}
-                ref={(node) => {
-                  if (node) {
-                    blockRefs.current.set(block.id, node);
-                    return;
-                  }
-                  blockRefs.current.delete(block.id);
-                }}
-                suppressContentEditableWarning
-              >
-                {block.text}
-              </div>
-            ) : (
-              <div className="pointer-events-none whitespace-pre-wrap break-words">
-                {layout.lines.map((line, index) => (
-                  <div className="min-h-[1em]" key={`${block.id}-line-${index}`}>
-                    {line.length ? line : "\u00A0"}
-                  </div>
-                ))}
-              </div>
-            )}
+            {block.text}
           </div>
         );
       })}
