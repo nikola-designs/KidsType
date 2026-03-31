@@ -23,7 +23,5 @@ body {
 body {
   font-family: "Avenir Next Rounded", "Nunito", "Segoe Print", "Trebuchet MS", system-ui, sans-serif;
   color: #2f3a2f;
-  background:
-    radial-gradient(120% 80% at 15% 0%, rgba(255, 255, 255, 0.7) 0%, rgba(237, 242, 235, 0.85) 35%, rgba(228, 235, 226, 0.95) 100%),
-    linear-gradient(180deg, #eff3ed 0%, #e4ece4 100%);
+  background: #ffffff;
 }
