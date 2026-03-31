@@ -41,7 +41,7 @@ const pointsAreClose = (a: { x: number; y: number }, b: { x: number; y: number }
 const focusEditableBlock = (container: HTMLElement, blockId: string) => {
   const focusElement = () => {
     const editable = container.querySelector(
-      `[data-text-block-id="${blockId}"]`
+      `[data-text-input-id="${blockId}"], [data-text-block-id="${blockId}"]`
     ) as HTMLElement | null;
     if (!editable) {
       return false;

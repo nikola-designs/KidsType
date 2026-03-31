@@ -13,7 +13,13 @@ type TextLayerProps = {
   onBlurBlock: (id: string) => void;
 };
 
-const placeCaretAtEnd = (element: HTMLElement) => {
+const placeCaretAtEnd = (element: HTMLElement | HTMLTextAreaElement) => {
+  if (element instanceof HTMLTextAreaElement) {
+    const end = element.value.length;
+    element.setSelectionRange(end, end);
+    return;
+  }
+
   const selection = window.getSelection();
   if (!selection) {
     return;
@@ -34,7 +40,7 @@ export const TextLayer = ({
   onUpdateBlock,
   onBlurBlock
 }: TextLayerProps) => {
-  const blockRefs = useRef(new Map<string, HTMLDivElement>());
+  const inputRefs = useRef(new Map<string, HTMLTextAreaElement>());
   const blockLayouts = useMemo(
     () =>
       new Map(
@@ -51,7 +57,7 @@ export const TextLayer = ({
       return;
     }
 
-    const activeElement = blockRefs.current.get(activeBlockId);
+    const activeElement = inputRefs.current.get(activeBlockId);
     if (!activeElement) {
       return;
     }
@@ -68,43 +74,68 @@ export const TextLayer = ({
           return null;
         }
 
+        const isActive = textMode && activeBlockId === block.id;
+        const sharedStyle = {
+          left: block.x,
+          top: block.y,
+          width: `${layout.width}px`,
+          minHeight: `${layout.height}px`,
+          lineHeight: `${textLayoutConfig.lineHeightPx}px`,
+          fontSize: `${textLayoutConfig.fontSizePx}px`,
+          fontWeight: textLayoutConfig.fontWeight
+        };
+
+        if (isActive) {
+          return (
+            <textarea
+              autoFocus
+              className="absolute resize-none overflow-hidden rounded-md border-none bg-transparent px-1 text-ink caret-sage outline-none"
+              data-text-block="true"
+              data-text-input-id={block.id}
+              key={block.id}
+              onBlur={() => onBlurBlock(block.id)}
+              onChange={(event) => onUpdateBlock(block.id, event.currentTarget.value)}
+              onPointerDown={(event) => {
+                event.stopPropagation();
+                onFocusBlock(block.id);
+              }}
+              ref={(node) => {
+                if (node) {
+                  inputRefs.current.set(block.id, node);
+                  return;
+                }
+                inputRefs.current.delete(block.id);
+              }}
+              rows={1}
+              spellCheck={false}
+              style={{
+                ...sharedStyle,
+                height: `${layout.height}px`
+              }}
+              value={block.text}
+            />
+          );
+        }
+
         return (
           <div
-            className="absolute whitespace-pre-wrap break-words rounded-md px-1 text-ink caret-sage outline-none"
-            contentEditable={textMode}
+            className="absolute whitespace-pre-wrap break-words rounded-md px-1 text-ink"
             data-text-block="true"
-            data-text-block-id={block.id}
             key={block.id}
-            onBlur={() => onBlurBlock(block.id)}
-            onInput={(event) => onUpdateBlock(block.id, event.currentTarget.textContent ?? "")}
             onPointerDown={(event) => {
               if (!textMode) {
                 return;
               }
               event.stopPropagation();
-              event.currentTarget.focus();
               onFocusBlock(block.id);
             }}
-            ref={(node) => {
-              if (node) {
-                blockRefs.current.set(block.id, node);
-                return;
-              }
-              blockRefs.current.delete(block.id);
-            }}
-            spellCheck={false}
-            style={{
-              left: block.x,
-              top: block.y,
-              width: `${layout.width}px`,
-              minHeight: `${layout.height}px`,
-              lineHeight: `${textLayoutConfig.lineHeightPx}px`,
-              fontSize: `${textLayoutConfig.fontSizePx}px`,
-              fontWeight: textLayoutConfig.fontWeight
-            }}
-            suppressContentEditableWarning
+            style={sharedStyle}
           >
-            {block.text}
+            {layout.lines.map((line, index) => (
+              <div className="min-h-[1em]" key={`${block.id}-line-${index}`}>
+                {line.length ? line : "\u00A0"}
+              </div>
+            ))}
           </div>
         );
       })}
