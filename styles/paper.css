@@ -1,0 +1,36 @@
+.paper-surface {
+  background:
+    radial-gradient(120% 90% at 50% 0%, rgba(255, 255, 255, 0.75) 0%, rgba(247, 243, 233, 0.9) 35%, rgba(241, 236, 223, 0.95) 100%),
+    repeating-linear-gradient(
+      180deg,
+      rgba(122, 158, 126, 0.05) 0,
+      rgba(122, 158, 126, 0.05) 1px,
+      rgba(247, 243, 233, 0.02) 1px,
+      rgba(247, 243, 233, 0.02) 4px
+    );
+  border: 1px solid rgba(122, 158, 126, 0.17);
+  box-shadow:
+    0 18px 35px rgba(62, 76, 63, 0.15),
+    0 2px 8px rgba(62, 76, 63, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+.paper-surface::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0) 22%),
+    radial-gradient(180% 120% at 50% 10%, rgba(255, 255, 255, 0) 40%, rgba(122, 158, 126, 0.04) 100%);
+}
+
+.paper-canvas {
+  touch-action: none;
+}
+
+.toolbar-shell {
+  backdrop-filter: blur(7px);
+  background: rgba(246, 248, 244, 0.82);
+}
