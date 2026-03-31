@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { PointerEvent as ReactPointerEvent } from "react";
+import { flushSync } from "react-dom";
 import { PaperSurface } from "@/components/PaperSurface";
 import { TextLayer } from "@/components/TextLayer";
 import { Toolbar } from "@/components/Toolbar";
@@ -36,6 +37,39 @@ const createStrokeId = () => {
 
 const pointsAreClose = (a: { x: number; y: number }, b: { x: number; y: number }) =>
   Math.hypot(a.x - b.x, a.y - b.y) < 0.35;
+
+const focusEditableBlock = (container: HTMLElement, blockId: string) => {
+  const focusElement = () => {
+    const editable = container.querySelector(
+      `[data-text-block-id="${blockId}"]`
+    ) as HTMLElement | null;
+    if (!editable) {
+      return false;
+    }
+
+    editable.focus();
+
+    const selection = window.getSelection();
+    if (!selection) {
+      return true;
+    }
+
+    const range = document.createRange();
+    range.selectNodeContents(editable);
+    range.collapse(false);
+    selection.removeAllRanges();
+    selection.addRange(range);
+    return true;
+  };
+
+  if (focusElement()) {
+    return;
+  }
+
+  requestAnimationFrame(() => {
+    focusElement();
+  });
+};
 
 export const CanvasWorkspace = () => {
   const [activeTool, setActiveTool] = useState<ActiveTool>("pencil");
@@ -220,11 +254,15 @@ export const CanvasWorkspace = () => {
         y: Math.max(10, point.y - 16)
       });
 
-      set((current) => ({
-        ...current,
-        textBlocks: [...current.textBlocks, nextBlock]
-      }));
-      setActiveBlockId(nextBlock.id);
+      flushSync(() => {
+        set((current) => ({
+          ...current,
+          textBlocks: [...current.textBlocks, nextBlock]
+        }));
+        setActiveBlockId(nextBlock.id);
+      });
+
+      focusEditableBlock(surface, nextBlock.id);
     },
     [activeTool, set]
   );

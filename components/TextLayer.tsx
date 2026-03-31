@@ -73,6 +73,7 @@ export const TextLayer = ({
             className="absolute whitespace-pre-wrap break-words rounded-md px-1 text-ink caret-sage outline-none"
             contentEditable={textMode}
             data-text-block="true"
+            data-text-block-id={block.id}
             key={block.id}
             onBlur={() => onBlurBlock(block.id)}
             onInput={(event) => onUpdateBlock(block.id, event.currentTarget.textContent ?? "")}
@@ -81,6 +82,7 @@ export const TextLayer = ({
                 return;
               }
               event.stopPropagation();
+              event.currentTarget.focus();
               onFocusBlock(block.id);
             }}
             ref={(node) => {
