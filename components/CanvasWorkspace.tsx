@@ -38,7 +38,7 @@ export const CanvasWorkspace = () => {
     useHistoryState<WorkspaceDocument>(initialWorkspaceDocument);
 
   const documentRef = useRef(present);
-  const surfaceRef = useRef<HTMLElement>(null);
+  const surfaceRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const drawingSessionRef = useRef<DrawingSession | null>(null);
   const rendererRef = useRef(new CanvasRenderer());
@@ -103,14 +103,14 @@ export const CanvasWorkspace = () => {
   }, [renderCanvas]);
 
   const startDrawing = useCallback(
-    (event: ReactPointerEvent<HTMLElement>) => {
+    (event: ReactPointerEvent<HTMLCanvasElement>) => {
       const surface = surfaceRef.current;
       if (!surface || activeTool === "text" || event.button !== 0) {
         return;
       }
 
       event.preventDefault();
-      surface.setPointerCapture(event.pointerId);
+      event.currentTarget.setPointerCapture(event.pointerId);
 
       const point = getRelativePointer(event, surface);
       const nextStroke: Stroke = {
@@ -132,7 +132,7 @@ export const CanvasWorkspace = () => {
   );
 
   const continueDrawing = useCallback(
-    (event: ReactPointerEvent<HTMLElement>) => {
+    (event: ReactPointerEvent<HTMLCanvasElement>) => {
       const drawingSession = drawingSessionRef.current;
       const surface = surfaceRef.current;
 
@@ -156,16 +156,15 @@ export const CanvasWorkspace = () => {
   );
 
   const finishDrawing = useCallback(
-    (event: ReactPointerEvent<HTMLElement>, shouldCommit: boolean) => {
-      const surface = surfaceRef.current;
+    (event: ReactPointerEvent<HTMLCanvasElement>, shouldCommit: boolean) => {
       const drawingSession = drawingSessionRef.current;
 
       if (!drawingSession || drawingSession.pointerId !== event.pointerId) {
         return;
       }
 
-      if (surface && surface.hasPointerCapture(event.pointerId)) {
-        surface.releasePointerCapture(event.pointerId);
+      if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+        event.currentTarget.releasePointerCapture(event.pointerId);
       }
 
       drawingSessionRef.current = null;
@@ -185,8 +184,19 @@ export const CanvasWorkspace = () => {
   );
 
   const handleClear = useCallback(() => {
+    drawingSessionRef.current = null;
     set({ strokes: [], textContent: "" });
   }, [set]);
+
+  const handleUndo = useCallback(() => {
+    drawingSessionRef.current = null;
+    undo();
+  }, [undo]);
+
+  const handleRedo = useCallback(() => {
+    drawingSessionRef.current = null;
+    redo();
+  }, [redo]);
 
   const handleTextChange = useCallback(
     (nextText: string) => {
@@ -214,10 +224,6 @@ export const CanvasWorkspace = () => {
             : "cursor-crosshair"
       }`}
       onContextMenu={(event) => event.preventDefault()}
-      onPointerCancel={(event) => finishDrawing(event, false)}
-      onPointerDown={startDrawing}
-      onPointerMove={continueDrawing}
-      onPointerUp={(event) => finishDrawing(event, true)}
       ref={surfaceRef}
     >
       <Toolbar
@@ -225,14 +231,20 @@ export const CanvasWorkspace = () => {
         canRedo={canRedo}
         canUndo={canUndo}
         onClear={handleClear}
-        onRedo={redo}
+        onRedo={handleRedo}
         onToolChange={setActiveTool}
-        onUndo={undo}
+        onUndo={handleUndo}
       />
 
       <canvas
         aria-label="Drawing surface"
-        className="absolute inset-0 z-0 h-full w-full touch-none"
+        className={`absolute inset-0 z-0 h-full w-full touch-none ${
+          activeTool === "text" ? "pointer-events-none" : "pointer-events-auto"
+        }`}
+        onPointerCancel={(event) => finishDrawing(event, false)}
+        onPointerDown={startDrawing}
+        onPointerMove={continueDrawing}
+        onPointerUp={(event) => finishDrawing(event, true)}
         ref={canvasRef}
       />
 

@@ -32,7 +32,11 @@ export const Toolbar = ({
   onRedo,
   onClear
 }: ToolbarProps) => (
-  <div className="absolute left-1/2 top-3 z-20 flex -translate-x-1/2 items-center gap-2 rounded-box border border-base-300/80 bg-base-200/90 p-2 shadow-lg backdrop-blur">
+  <div
+    className="absolute left-1/2 top-3 z-20 flex -translate-x-1/2 items-center gap-2 rounded-box border border-base-300/80 bg-base-200/90 p-2 shadow-lg backdrop-blur"
+    onPointerDownCapture={(event) => event.stopPropagation()}
+    onPointerUpCapture={(event) => event.stopPropagation()}
+  >
     {toolButtons.map((tool) => (
       <button
         aria-pressed={activeTool === tool.id}
