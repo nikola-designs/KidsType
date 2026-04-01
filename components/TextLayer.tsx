@@ -29,8 +29,8 @@ export const TextLayer = ({ text, textMode, onTextChange }: TextLayerProps) => {
       <textarea
         autoCapitalize="sentences"
         autoCorrect="on"
-        className={`absolute inset-0 w-full resize-none border-none bg-transparent px-6 pb-6 pt-24 text-[clamp(1.45rem,2vw,2rem)] font-semibold leading-[1.4] text-ink outline-none ${
-          textMode ? "pointer-events-auto caret-sage" : "pointer-events-none caret-transparent"
+        className={`absolute inset-0 w-full resize-none border-none bg-transparent px-6 pb-6 pt-24 text-[clamp(1.45rem,2vw,2rem)] font-semibold leading-[1.4] text-base-content outline-none ${
+          textMode ? "pointer-events-auto caret-primary" : "pointer-events-none caret-transparent"
         }`}
         onChange={(event) => onTextChange(event.currentTarget.value)}
         readOnly={!textMode}

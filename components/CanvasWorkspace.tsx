@@ -206,7 +206,7 @@ export const CanvasWorkspace = () => {
 
   return (
     <section
-      className={`relative h-full w-full overflow-hidden bg-white ${
+      className={`relative h-full w-full overflow-hidden bg-base-100 text-base-content ${
         activeTool === "text"
           ? "cursor-text"
           : activeTool === "eraser"

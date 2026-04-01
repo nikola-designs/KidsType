@@ -18,6 +18,7 @@ No forms, worksheets, or quiz mechanics are used.
 - React
 - TypeScript
 - Tailwind CSS
+- DaisyUI (cupcake theme)
 - HTML canvas rendering layer
 - `@chenglou/pretext` for text layout/measurement
 

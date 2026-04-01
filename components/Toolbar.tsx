@@ -23,9 +23,6 @@ const toolButtons: ToolButtonConfig[] = [
   { id: "text", label: "Type" }
 ];
 
-const baseButtonClasses =
-  "h-11 min-w-20 rounded-2xl px-4 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage/70";
-
 export const Toolbar = ({
   activeTool,
   canUndo,
@@ -35,14 +32,12 @@ export const Toolbar = ({
   onRedo,
   onClear
 }: ToolbarProps) => (
-  <div className="toolbar-shell absolute left-1/2 top-3 z-20 flex -translate-x-1/2 items-center gap-2 rounded-3xl border border-sage/20 p-2 shadow-sm">
+  <div className="absolute left-1/2 top-3 z-20 flex -translate-x-1/2 items-center gap-2 rounded-box border border-base-300/80 bg-base-200/90 p-2 shadow-lg backdrop-blur">
     {toolButtons.map((tool) => (
       <button
         aria-pressed={activeTool === tool.id}
-        className={`${baseButtonClasses} ${
-          activeTool === tool.id
-            ? "bg-sage text-white shadow-sm"
-            : "bg-white/90 text-ink hover:bg-white"
+        className={`btn h-11 min-h-11 min-w-20 rounded-box px-4 text-sm font-semibold ${
+          activeTool === tool.id ? "btn-primary" : "btn-ghost bg-base-100/70"
         }`}
         key={tool.id}
         onClick={() => onToolChange(tool.id)}
@@ -51,9 +46,9 @@ export const Toolbar = ({
         {tool.label}
       </button>
     ))}
-    <div className="mx-1 h-8 w-px bg-sage/15" />
+    <div className="mx-1 h-8 w-px bg-base-content/20" />
     <button
-      className={`${baseButtonClasses} bg-white/90 text-ink hover:bg-white disabled:cursor-not-allowed disabled:opacity-35`}
+      className="btn btn-ghost h-11 min-h-11 min-w-20 rounded-box bg-base-100/70 px-4 text-sm font-semibold disabled:opacity-35"
       disabled={!canUndo}
       onClick={onUndo}
       type="button"
@@ -61,7 +56,7 @@ export const Toolbar = ({
       Undo
     </button>
     <button
-      className={`${baseButtonClasses} bg-white/90 text-ink hover:bg-white disabled:cursor-not-allowed disabled:opacity-35`}
+      className="btn btn-ghost h-11 min-h-11 min-w-20 rounded-box bg-base-100/70 px-4 text-sm font-semibold disabled:opacity-35"
       disabled={!canRedo}
       onClick={onRedo}
       type="button"
@@ -69,7 +64,7 @@ export const Toolbar = ({
       Redo
     </button>
     <button
-      className={`${baseButtonClasses} bg-rose-50 text-rose-900 hover:bg-rose-100`}
+      className="btn btn-outline btn-secondary h-11 min-h-11 min-w-20 rounded-box px-4 text-sm font-semibold"
       onClick={onClear}
       type="button"
     >
